@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <div class="p-[30px]">
+    <h1 class="text-3xl font-bold">Todos</h1>
+    <div class="h-[25px]"></div>
+    <div class="flex items-center">
+      <input id="addTodoInp" type="text" placeholder="Todo Title" class="rounded-lg bg-stone-100 text-zinc-900 px-[18px] py-[8px] border-solid border-zinc-900 border-2 w-[500px]">
+      <div class="inline-block w-[10px]"></div>
+      <button id="addTodoBtn" class="bg-teal-800 text-white rounded-lg px-[18px] py-[8px]">Add</button>
+    </div>
+    <div class="h-[25px]"></div>
+
+    {% for todo in todos %}
+      <div class="p-[15px] my-[10px] rounded-lg bg-zinc-900 text-white flex items-center">
+        <div class="flex-none">
+          <input id="completed-{{ todo.id }}" type="checkbox" class="w-[20px] h-[20px]" {% if todo.completed %}checked{% endif %}>
+        </div>
+        <div class="inline-block w-[10px]"></div>
+        <div class="grow">
+          <h1 {% if todo.completed %}class="line-through"{% endif %}>{{ todo.title }}</h1>
+        </div>
+        <div class="flex-none">
+          <button id="deleteBtn-{{ todo.id }}" class="bg-red-800 text-white rounded-lg px-[18px] py-[8px]">Delete</button>
+        </div>
+      </div>
+
+      <script>
+        document.getElementById("deleteBtn-{{ todo.id }}").addEventListener("click", async () => {
+          await fetch("/delete/{{ todo.id }}", { method: "POST" })
+          location.reload()
+        })
+
+        document.getElementById("completed-{{ todo.id }}").addEventListener("change", async e => {
+          e.preventDefault()
+          await fetch("/toggle-completed/{{ todo.id }}", { method: "POST" })
+          location.reload()
+        })
+      </script>
+    {% endfor %}
+  </div>
+
+  <script>
+    document.getElementById("addTodoBtn").addEventListener("click", async () => {
+      const title = document.getElementById("addTodoInp").value
+      await fetch("/new", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ title }),
+      })
+      location.reload()
+    })
+  </script>
+
+{% endblock %}
